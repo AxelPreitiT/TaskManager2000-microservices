@@ -1,0 +1,120 @@
+stages:
+  - test
+  - build
+  - deploy
+
+test-orquestador:
+  stage: test
+  trigger:
+    include: orquestador/.gitlab-ci-test.yml
+    strategy: depend
+  rules:
+    - changes:
+        - orquestador/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+test-scheduler:
+  stage: test
+  trigger:
+    include: scheduler/.gitlab-ci-test.yml
+    strategy: depend
+  rules:
+    - changes:
+        - scheduler/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+test-task-service:
+  stage: test
+  trigger:
+    include: task-service/.gitlab-ci-test.yml
+    strategy: depend
+  rules:
+    - changes:
+        - task-service/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+test-wf-manager:
+  stage: test
+  trigger:
+    include: wf-manager/.gitlab-ci-test.yml
+    strategy: depend
+  rules:
+    - changes:
+        - wf-manager/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-orquestador:
+  stage: build
+  trigger:
+    include: orquestador/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - orquestador/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-scheduler:
+  stage: build
+  trigger:
+    include: scheduler/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - scheduler/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-task-service:
+  stage: build
+  trigger:
+    include: task-service/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - task-service/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-wf-manager:
+  stage: build
+  trigger:
+    include: wf-manager/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - wf-manager/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+deploy-k8s:
+  stage: deploy
+  image:
+    name: ghcr.io/helmfile/helmfile:latest
+    entrypoint: [""] # Override the default entrypoint
+  script:
+    - echo "Deploying to k8s ..."
+    # Move the config file to the helm directory to connecto to AWS kubectl
+    - mkdir -p /helm/.kube
+    - mkdir -p ~/.ssh
+    - echo "$ENCODED_ID_ED25519" | base64 -d > ~/.ssh/id_ed25519
+    - echo "$ID_ED25519_pub" > ~/.ssh/id_ed25519.pub
+    - chmod 400 ~/.ssh/id_ed25519
+    - scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o IdentitiesOnly=yes -o User=ubuntu ubuntu@$CLUSTER_IP:~/.kube/config /helm/.kube/config
+    - cat /helm/.kube/config
+    - cd ~
+    - git clone [PRIVATE_REPO]
+    - cd [PRIVATE_REPO]
+    - ls
+    - echo "Install dependencies"
+    - echo "$CLUSTER_IP"
+    - echo "Deploy to AWS"
+    - echo "Modifying the kubeconfig file to use the master node's IP address..."
+    - sed -i '4d' ~/.kube/config
+    - |
+      sed -i "s/server: https:\/\/.*:6443/server: https:\/\/$CLUSTER_IP:6443\n    insecure-skip-tls-verify: true/g" ~/.kube/config
+    - cat ~/.kube/config
+    - kubectl get nodes
+    - cd ../terraform
+    - export NFS_SERVER=$NFS_SERVER_IP
+    - cd ../helm
+    - helmfile apply
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

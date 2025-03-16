@@ -1,0 +1,24 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.pdb
+*.egg-info/
+*.eggs/
+dist/
+build/
+*.log
+*.sqlite3
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+
+.vscode
+
+# If using pipenv, you can ignore the following files if you don’t want to commit them:
+# Pipfile.lock (not recommended)
+# pipfile.lock

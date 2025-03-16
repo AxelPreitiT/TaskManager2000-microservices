@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMapName }}  # Este es el nombre que va a haber que referenciar
+  namespace: {{ .Values.namespace }}
+data:
+  PORT: "{{ .Values.container.port }}"
+  HC_CACHE_TTL: "{{ .Values.hc.cacheTtl }}"
+  REDIS_HOST: "redis-{{ .Values.namespace }}-master" # Apunta al servicio!
+  REDIS_PORT: "{{ .Values.redis.port }}"
+  KAFKA_BROKERS: {{ .Values.kafkaqueue.producerBrokers }}
+  KAFKA_USERNAME: {{ .Values.kafkaqueue.username }}
+  KAFKA_PASSWORD: {{ .Values.kafkaqueue.password }}
+  KAFKA_TOPIC: {{ .Values.wfexecutionqueue.topic }}
+  KAFKA_CLIENT_ID_PREFIX: {{ .Values.wfexecutionqueue.clientId }}
+
+  # Nombre del servicio, con el que se identifica en los logs
+  SERVICE_NAME_PREFIX: {{ .Values.container.name }}
+
+  # Esta es la URL al backend de observabilidad
+  LOGGER_URL: {{ .Values.signoz.loggerUrl }}
+  TRACE_URL: {{ .Values.signoz.traceUrl }}

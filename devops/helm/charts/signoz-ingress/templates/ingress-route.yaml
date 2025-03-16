@@ -1,0 +1,14 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: signoz-ingressroute
+  namespace: default
+spec:
+  routes:                          
+  - kind: Rule
+    match: PathPrefix(`/`) && !(PathPrefix(`/triggers`)  || Header(`Content-Type`, `application/grpc`) || PathPrefix(`/executions`) || PathPrefix(`/cancel-execution`) || PathPrefix(`/dashboard`) || PathPrefix(`/workflows`) || PathPrefix(`/workflow-execution`))
+    # match: PathPrefix(`/logs`)
+    services:                       
+      - kind: Service
+        name: signoz-frontend
+        port: 3301

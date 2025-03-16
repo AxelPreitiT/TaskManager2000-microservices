@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMapName }}
+  namespace: {{ .Values.namespace }}
+data:
+  REDIS_HOST: "redis-{{ .Values.namespace }}-master" # Apunta al servicio!
+  REDIS_PORT: "6379"
+  HC_CACHE_TTL: "300"
+  # Nombre del servicio, con el que se identifica en los logs
+  SERVICE_NAME_PREFIX: {{ .Values.container.name }}
+
+  # Esta es la URL al backend de observabilidad
+  LOGGER_URL: {{ .Values.signoz.loggerUrl }}
+  TRACE_URL: {{ .Values.signoz.traceUrl }}

@@ -1,0 +1,15 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-ingressroute
+  namespace: {{ .Values.namespace }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/workflows`)
+      services:
+        - kind: Service
+          name: {{ .Values.wfmanager.service.name }}
+          port: {{ .Values.wfmanager.service.port }}

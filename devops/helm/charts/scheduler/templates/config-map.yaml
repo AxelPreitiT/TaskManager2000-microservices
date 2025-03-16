@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configMapName }}  # Este es el nombre que va a haber que referenciar
+  namespace: {{ .Values.namespace }}
+data:
+  PORT: "{{ .Values.container.port }}"
+  HC_CACHE_TTL: "{{ .Values.hc.cacheTtl }}"
+
+  # Nombre del servicio, con el que se identifica en los logs
+  SERVICE_NAME_PREFIX: {{ .Values.container.name }}
+
+  # Esta es la URL al backend de observabilidad
+  LOGGER_URL: {{ .Values.signoz.loggerUrl }}
+  TRACE_URL: {{ .Values.signoz.traceUrl }}
+
+  # Recibe steps del orquestador
+  KAFKA_BROKERS_SSR: {{ .Values.kafkaqueue.consumerBrokers }}
+  KAFKA_USERNAME_SSR: {{ .Values.kafkaqueue.username }}
+  KAFKA_PASSWORD_SSR: {{ .Values.kafkaqueue.password }}
+  KAFKA_CLIENT_ID_SSR_PREFIX: {{ .Values.stepschedulequeue.clientId }}
+  KAFKA_GROUP_ID_SSR: {{ .Values.stepschedulequeue.groupId }}
+  KAFKA_TOPIC_SSR: {{ .Values.stepschedulequeue.topic }}
+
+  # Manda errores al orquestador
+  KAFKA_BROKERS_SEE: {{ .Values.kafkaqueue.producerBrokers }}
+  KAFKA_CLIENT_ID_SEE_PREFIX: {{ .Values.errorschedulequeue.clientId }}
+  KAFKA_USERNAME_SEE: {{ .Values.kafkaqueue.username }}
+  KAFKA_PASSWORD_SEE: {{ .Values.kafkaqueue.password }}
+  KAFKA_TOPIC_SEE: {{ .Values.errorqueue.topic }}
+
+  TASK_SERVICE_URL: "http://{{ .Values.taskservice.service.name }}.{{ .Values.taskservice.namespace }}.svc.cluster.local:{{ .Values.taskservice.service.port }}"

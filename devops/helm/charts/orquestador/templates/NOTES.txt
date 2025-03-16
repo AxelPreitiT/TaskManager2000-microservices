@@ -1,0 +1,6 @@
+// ¿Que necesitamos?
+// Un pod para el microservicio
+// Un deployment para el pod
+// Un service para el deployment (que se va a usar con Traefik). TODO: Service GRPC
+// Conectarse a una instancia de postgres
+// Conectarse a la cola de kafka

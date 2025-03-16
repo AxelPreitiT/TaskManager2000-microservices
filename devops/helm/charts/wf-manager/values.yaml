@@ -1,0 +1,38 @@
+configMapName: wf-manager-config
+
+namespace: wf-manager
+
+fullname: wf-manager
+
+ingress:
+  host: wf-manager
+
+container:
+  port: 3000
+  portName: wf-m-cont-port
+  name: wf-manager
+
+redis:
+  port: 6379
+
+wfexecutionqueue:
+  clientId: wf-manager
+
+labels:
+  app: wf-manager
+
+image:
+  name: wf-manager
+  tag: 1.0.0 # This is the image tag (must be overridden in the ci/cd pipeline with --set image.tag=[IMAGE_TAG])
+
+livenessProbe:
+  httpGet:
+    path: /ping
+    port: wf-m-cont-port
+
+readinessProbe:
+  httpGet:
+    path: /ping
+    port: wf-m-cont-port
+
+replicaCount: 3

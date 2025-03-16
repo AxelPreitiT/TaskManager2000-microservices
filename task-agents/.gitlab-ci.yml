@@ -1,0 +1,98 @@
+stages:
+  - test
+  - build
+
+test-download-s3:
+  stage: test
+  script:
+    - echo "Testing download-s3..."
+  rules:
+    - changes:
+        - download-s3/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+test-upload-s3:
+  stage: test
+  script:
+    - echo "Testing upload-s3..."
+  rules:
+    - changes:
+        - download-s3/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+test-echo:
+  stage: test
+  script:
+    - echo "Testing echo..."
+  rules:
+    - changes:
+        - download-s3/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+test-linux-command:
+  stage: test
+  script:
+    - echo "Testing linux-command..."
+  rules:
+    - changes:
+        - download-s3/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+test-sidecar:
+  stage: test
+  script:
+    - echo "Testing sidecar..."
+  rules:
+    - changes:
+        - download-s3/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-download-s3:
+  stage: build
+  trigger:
+    include: download-s3/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - download-s3/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-upload-s3:
+  stage: build
+  trigger:
+    include: upload-s3/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - upload-s3/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-echo:
+  stage: build
+  trigger:
+    include: echo/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - echo/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-linux-command:
+  stage: build
+  trigger:
+    include: linux-command/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - linux-command/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+build-sidecar:
+  stage: build
+  trigger:
+    include: sidecar/.gitlab-ci.yml
+    strategy: depend
+  rules:
+    - changes:
+        - sidecar/**/*
+    - if: '$CI_COMMIT_BRANCH == "main"'

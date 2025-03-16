@@ -1,0 +1,61 @@
+configMapName: orquestador-config
+
+namespace: orquestador
+
+fullname: orquestador
+
+ingress:
+  host: orquestador
+
+container:
+  port: 3000
+  portName: orq-cont-port
+  name: orquestador
+
+stepschedulequeue:
+  clientId: orquestadorToScheduler
+
+wfexecutionqueue:
+  clientId: orquestadorWf
+  groupId: orquestadorWfExec
+
+errorschedulequeue:
+  clientId: scheduleerror
+  groupId: orquestadorError
+
+stepResultQueue:
+  clientId: orqResult
+  groupId: orquestadorResults
+
+wfexecutiondb:
+  port: 5432
+  username: postgres
+  password: password
+  name: wf-execution-db
+  sync: true
+
+labels:
+  app: orquestador
+
+image:
+  name: orquestador
+  tag: 1.0.0 # This is the image tag (must be overridden in the ci/cd pipeline with --set image.tag=[IMAGE_TAG])
+
+livenessProbe:
+  httpGet:
+    path: /ping
+    port: 3000
+  initialDelaySeconds: 60  # Wait 10 seconds before the first probe
+  periodSeconds: 20         # Check every 5 seconds
+  failureThreshold: 3      # Allow 3 failed checks before restart
+
+readinessProbe:
+  httpGet:
+    path: /ping
+    port: 3000
+  initialDelaySeconds: 60  # Wait 5 seconds before the first probe
+  periodSeconds: 20         # Check every 3 seconds
+  failureThreshold: 3      # Allow 3 failed checks before marking unready
+
+
+replicaCount: 3

@@ -1,0 +1,44 @@
+configMapName: bash-agent-config
+
+replicaCount: 2
+
+namespace: agents
+
+fullname: bash-agent-deployment
+
+agentName: bash-agent
+sidecarName: sidecar
+
+agentImage:
+  name: agent-linux-command
+
+sidecarImage:
+  name: agent-sidecar
+
+agent:
+  url: "http://localhost:8000/execute"
+  name: "bash"
+  paramNames:
+    - "command"
+  paramTypes:
+    - "string"
+
+schedulerToAgent:
+  clientId: scheToAgentBash
+  groupId: bashAgentGroup
+  topic: bashAgent # Cada Agent tiene que tener su propio tópico
+
+labels:
+  app: bash
+
+nfs:
+  path: /answers
+
+livenessProbe:
+  httpGet:
+    path: /ping
+    port: 8500
+readinessProbe:
+  httpGet:
+    path: /ping
+    port: 8500

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.taskservice.service.name }}
+  labels:
+    {{- toYaml .Values.labels | nindent 4 }}
+  namespace: {{ .Values.namespace }}
+spec:
+  type: {{ .Values.taskservice.service.type }}
+  ports:
+    - port: {{ .Values.taskservice.service.port }} 
+      targetPort: {{ .Values.container.portName }}
+      protocol: TCP
+      name: {{ .Values.scheduler.service.portName }}
+  selector:
+    {{- toYaml .Values.labels | nindent 4 }}

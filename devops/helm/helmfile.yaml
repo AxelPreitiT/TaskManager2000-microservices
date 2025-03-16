@@ -1,0 +1,220 @@
+repositories:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+  - name: traefik
+    url: https://traefik.github.io/charts
+  - name: signoz
+    url: https://charts.signoz.io
+
+releases:
+  - name: traefik
+    namespace: default
+    chart: traefik/traefik
+    values:
+      - installCRDs: true
+      - ./charts/values-traefik.yaml
+
+  - name: local-storage-provisioner
+    namespace: local-path-storage
+    chart: ./charts/local-path-provisioner
+    values:
+      - storageClass:
+          name: "local-path"
+
+  - name: orquestador
+    chart: ./charts/orquestador
+    version: 1.0.0
+    namespace: orquestador
+    values:
+      - ./charts/orquestador/values.yaml
+      - ./charts/global-values.yaml
+      - pvc:
+            name: "orquestador-service-pv"
+            accessMode: "ReadWriteMany"
+            size: "1Gi"
+            label: "orquestador-pv"
+      - volumes:
+            name: "orquestador-service-pv"
+            persistentVolumeClaim:
+              claimName: "orquestador-service-pv"
+      - volumeMounts:
+            name: "orquestador-service-pv"
+            mountPath: "/answers"
+            readOnly: false
+
+  - name: scheduler
+    chart: ./charts/scheduler
+    version: 1.0.0
+    namespace: scheduler
+    values:
+      - ./charts/scheduler/values.yaml
+      - ./charts/global-values.yaml
+
+  - name: task-service
+    chart: ./charts/task-service
+    version: 1.0.0
+    namespace: task-service
+    values:
+      - ./charts/task-service/values.yaml
+      - ./charts/global-values.yaml
+
+  - name: wf-manager
+    chart: ./charts/wf-manager
+    version: 1.0.0
+    namespace: wf-manager
+    values:
+      - ./charts/wf-manager/values.yaml
+      - ./charts/global-values.yaml
+
+  - name: redis-task-service
+    chart: bitnami/redis
+    version: 20.7.0
+    namespace: task-service
+    values:
+      - ./charts/values-redis.yaml
+
+  - name: redis-wf-manager
+    chart: bitnami/redis
+    version: 20.7.0
+    namespace: wf-manager
+    values:
+      - ./charts/values-redis.yaml
+
+  - name: wf-execution-db
+    chart: bitnami/postgresql
+    version: 16.4.7
+    namespace: orquestador
+    values:
+      - auth:
+          username: "postgres"
+          password: "password"
+          database: "wf-execution-db"
+      - primary:
+          service:
+            type: ClusterIP
+            ports:
+              postgresql: 5432
+            nodePorts:
+              postgresql: 5432
+          persistence:
+            size: "1Gi"
+      - metrics:
+          enabled: false
+      - global:
+          defaultStorageClass: "local-path"
+
+  - name: kafka
+    chart: bitnami/kafka
+    version: 31.0.0
+    values:
+      - ./charts/values-kafka.yaml
+
+  - name: signoz
+    chart: signoz/signoz
+    namespace: default
+    values:
+      - ./charts/values-signoz.yaml
+  
+  - name: signoz-ingress
+    namespace: default
+    chart: ./charts/signoz-ingress
+
+  - name: shared-nfs
+    namespace: default
+    chart: ./charts/nfs
+    values:
+      - names:
+          - "echo-pv"
+          - "upload-pv"
+          - "download-pv"
+          - "bash-pv"
+          - "orquestador-pv"
+      - storage: "1Gi"
+      - accessMode: "ReadWriteMany"
+      - nfsServer: {{ requiredEnv "NFS_SERVER" }} # IP privada del EC2 en donde está el NFS
+      - nfsPath: "/mnt/nfs"
+  
+  - name: echo-agent
+    chart: ./charts/echo
+    version: 2.0.0
+    namespace: agents
+    values:
+      - ./charts/echo/values.yaml
+      - ./charts/global-values.yaml
+      - pvc:
+          name: "echo-service-pv"
+          accessMode: "ReadWriteMany"
+          size: "1Gi"
+          label: "echo-pv"
+      - volumes:
+          name: "echo-service-pv"
+          persistentVolumeClaim:
+            claimName: "echo-service-pv"
+      - volumeMounts:
+          name: "echo-service-pv"
+          mountPath: "/answers"
+          readOnly: false
+
+
+  - name: bash-agent
+    chart: ./charts/bash
+    version: 1.0.0
+    namespace: agents
+    values:
+      - ./charts/bash/values.yaml
+      - ./charts/global-values.yaml
+      - pvc:
+          name: "bash-service-pv"
+          accessMode: "ReadWriteMany"
+          size: "1Gi"
+          label: "bash-pv"
+      - volumes:
+          name: "bash-service-pv"
+          persistentVolumeClaim:
+            claimName: "bash-service-pv"
+      - volumeMounts:
+          name: "bash-service-pv"
+          mountPath: "/answers"
+          readOnly: false
+
+  - name: s3-upload-agent
+    chart: ./charts/s3-upload
+    version: 1.0.0
+    namespace: agents
+    values:
+      - ./charts/s3-upload/values.yaml
+      - ./charts/global-values.yaml
+      - pvc:
+          name: "upload-service-pv"
+          accessMode: "ReadWriteMany"
+          size: "1Gi"
+          label: "upload-pv"
+      - volumes:
+          name: "upload-service-pv"
+          persistentVolumeClaim:
+            claimName: "upload-service-pv"
+      - volumeMounts:
+          name: "upload-service-pv"
+          mountPath: "/answers"
+          readOnly: false
+
+  - name: s3-download-agent
+    chart: ./charts/s3-download
+    version: 1.0.0
+    namespace: agents
+    values:
+      - ./charts/s3-download/values.yaml
+      - ./charts/global-values.yaml
+      - pvc:
+          name: "download-service-pv"
+          accessMode: "ReadWriteMany"
+          size: "1Gi"
+          label: "download-pv"
+      - volumes:
+          name: "download-service-pv"
+          persistentVolumeClaim:
+            claimName: "download-service-pv"
+      - volumeMounts:
+          name: "download-service-pv"
+          mountPath: "/answers"
+          readOnly: false

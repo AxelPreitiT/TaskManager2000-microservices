@@ -1,0 +1,50 @@
+configMapName: upload-agent-config
+
+replicaCount: 2
+
+namespace: agents
+
+fullname: upload-agent-deployment
+
+agentName: upload-agent
+sidecarName: sidecar
+
+agentImage:
+  name: agent-upload-s3
+
+sidecarImage:
+  name: agent-sidecar
+
+agent:
+  url: "http://localhost:8000/upload"
+  name: "s3_upload"
+  paramNames:
+    - "aws_bucket"
+    - "aws_region"
+    - "file_key"
+    - "file_content"
+  paramTypes:
+    - "string"
+    - "string"
+    - "string"
+    - "string"
+
+schedulerToAgent:
+  clientId: scheToAgentUpload
+  groupId: uploadAgentGroup
+  topic: uploadAgent # Cada Agent tiene que tener su propio tópico
+
+labels:
+  app: upload
+
+nfs:
+  path: /answers
+
+livenessProbe:
+  httpGet:
+    path: /ping
+    port: 8500
+readinessProbe:
+  httpGet:
+    path: /ping
+    port: 8500

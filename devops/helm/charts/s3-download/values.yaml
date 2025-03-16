@@ -1,0 +1,48 @@
+configMapName: download-agent-config
+
+replicaCount: 2
+
+namespace: agents
+
+fullname: download-agent-deployment
+
+agentName: download-agent
+sidecarName: sidecar
+
+agentImage:
+  name: agent-download-s3
+
+sidecarImage:
+  name: agent-sidecar
+
+agent:
+  url: "http://localhost:8000/download"
+  name: "s3_download"
+  paramNames:
+    - "aws_bucket"
+    - "aws_region"
+    - "file_name"
+  paramTypes:
+    - "string"
+    - "string"
+    - "string"
+
+schedulerToAgent:
+  clientId: scheToAgentDownload
+  groupId: downloadAgentGroup
+  topic: downloadAgent # Cada Agent tiene que tener su propio tópico
+
+labels:
+  app: download
+
+nfs:
+  path: /answers
+
+livenessProbe:
+  httpGet:
+    path: /ping
+    port: 8500
+readinessProbe:
+  httpGet:
+    path: /ping
+    port: 8500
